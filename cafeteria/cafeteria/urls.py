@@ -22,6 +22,12 @@ from pedido import views
 
 urlpatterns = [
     path("", views.inicio, name="inicio"),
+    path("catalogo/", views.catalogo, name="catalogo"),
+    path(
+        "carrito/agregar/<int:producto_id>/",
+        views.agregar_al_carrito,
+        name="agregar_al_carrito",
+    ),
     path("accounts/login/", auth_views.LoginView.as_view(
         template_name="registration/login.html",
     ), name="login"),

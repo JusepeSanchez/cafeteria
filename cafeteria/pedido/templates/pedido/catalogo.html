@@ -1,0 +1,45 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Catálogo | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Catálogo</h1>
+    <form method="get">
+        <label for="q">Buscar producto</label>
+        <input id="q" name="q" type="search" value="{{ busqueda }}">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria">
+            <option value="">Todas las categorías</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.pk }}" {% if categoria_seleccionada == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ categoria.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if productos %}
+        <ul>
+            {% for producto in productos %}
+                <li>
+                    <h2>{{ producto.nombre }}</h2>
+                    <p>{{ producto.categoria.nombre }}</p>
+                    <p>{{ producto.descripcion }}</p>
+                    <p>{{ producto.precio|pesos_chilenos }}</p>
+                    {% if producto.stock > 0 %}
+                        <form method="post" action="{% url 'agregar_al_carrito' producto.pk %}">
+                            {% csrf_token %}
+                            <button type="submit">Agregar al carrito</button>
+                        </form>
+                    {% else %}
+                        <p>Agotado</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No se encontraron productos disponibles.</p>
+    {% endif %}
+{% endblock %}

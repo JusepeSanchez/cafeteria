@@ -35,7 +35,7 @@ class AutenticacionTests(TestCase):
     def test_menu_muestra_usuario_y_rol(self):
         self.client.force_login(self.cliente)
 
-        response = self.client.get("/")
+        response = self.client.get("/catalogo/")
 
         self.assertContains(response, "cliente (Cliente)")
 
