@@ -39,6 +39,19 @@ class AutenticacionTests(TestCase):
 
         self.assertContains(response, "cliente (Cliente)")
 
+    def test_menu_admin_muestra_usuario_y_rol_de_encargado(self):
+        encargado = get_user_model().objects.create_user(
+            username="encargado",
+            password="prueba123",
+            is_staff=True,
+        )
+        self.client.force_login(encargado)
+
+        response = self.client.get("/admin/")
+
+        self.assertContains(response, "encargado")
+        self.assertContains(response, "Rol: Encargado")
+
     def test_sesion_expira_en_30_minutos(self):
         self.client.force_login(self.cliente)
 

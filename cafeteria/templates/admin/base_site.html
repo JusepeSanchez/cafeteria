@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:"Administración de Cafetería" }}{% endblock %}
+
+{% block branding %}
+    <div id="site-name">
+        <a href="{% url 'admin:index' %}">{{ site_header|default:"Administración de Cafetería" }}</a>
+    </div>
+{% endblock %}
+
+{% block welcome-msg %}
+    {{ block.super }}
+    Rol: Encargado
+{% endblock %}
