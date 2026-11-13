@@ -4,35 +4,57 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Cafetería{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pedido/site.css' %}">
 </head>
-<body>
+<body class="{% if user.is_staff %}staff-shell{% else %}customer-shell{% endif %}">
     {% load catalogo_extras %}
-    <header>
-        <a href="{% url 'inicio' %}">Cafetería</a>
-        {% if user.is_authenticated %}
-            <span>Conectado: {{ user.get_username }} ({{ user.is_staff|yesno:"Encargado,Cliente" }})</span>
-            {% if user.is_staff %}
-                <a href="{% url 'gestion_productos' %}">Productos</a>
-                <a href="{% url 'gestion_categorias' %}">Categorías</a>
-                <a href="{% url 'pedidos_del_dia' %}">Pedidos</a>
+    <header class="site-header">
+        <div class="header-top">
+            <a class="brand" href="{% url 'inicio' %}">
+                <span class="brand-mark" aria-hidden="true">C</span>
+                <span class="brand-copy"><strong>Cafetería</strong><small>ALGO RICO, CERCA DE TI</small></span>
+            </a>
+            <p class="header-promise"><span aria-hidden="true">✦</span> Preparado con cariño, listo para retirar</p>
+            {% if user.is_authenticated %}
+                <span class="user-chip"><span class="user-dot"></span>{{ user.get_username }} ({{ user.is_staff|yesno:"Encargado,Cliente" }})</span>
             {% else %}
-                <a href="{% url 'catalogo' %}">Catálogo</a>
-                <a href="{% url 'carrito' %}">Carrito ({{ request.session.carrito|unidades_carrito }})</a>
-                <a href="{% url 'mis_pedidos' %}">Mis pedidos</a>
+                <a class="header-login" href="{% url 'login' %}">Ingresar</a>
             {% endif %}
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit">Cerrar sesión</button>
-            </form>
+        </div>
+        {% if user.is_authenticated %}
+            <div class="header-nav-wrap">
+                <nav class="main-nav" aria-label="Navegación principal">
+                    {% if user.is_staff %}
+                        <a href="{% url 'gestion_productos' %}">Productos</a>
+                        <a href="{% url 'gestion_categorias' %}">Categorías</a>
+                        <a href="{% url 'pedidos_del_dia' %}">Pedidos</a>
+                    {% else %}
+                        <a href="{% url 'catalogo' %}">Catálogo</a>
+                        <a href="{% url 'carrito' %}">Carrito <span class="cart-count">{{ request.session.carrito|unidades_carrito }}</span></a>
+                        <a href="{% url 'mis_pedidos' %}">Mis pedidos</a>
+                    {% endif %}
+                    <form class="logout-form" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="nav-logout" type="submit">Cerrar sesión</button>
+                    </form>
+                </nav>
+            </div>
         {% endif %}
     </header>
-    <main>
+    <main class="page-container">
         {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
+            <div class="messages" aria-live="polite">
+                {% for message in messages %}
+                    <p class="message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <footer class="site-footer">
+        <div><strong>Cafetería</strong><span>Un buen momento empieza con algo rico.</span></div>
+        <small>Hecho para disfrutar · Retiro en tienda</small>
+    </footer>
 </body>
 </html>

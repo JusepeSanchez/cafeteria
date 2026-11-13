@@ -4,42 +4,74 @@
 {% block title %}Catálogo | Cafetería{% endblock %}
 
 {% block content %}
-    <h1>Catálogo</h1>
-    <form method="get">
-        <label for="q">Buscar producto</label>
-        <input id="q" name="q" type="search" value="{{ busqueda }}">
-        <label for="categoria">Categoría</label>
-        <select id="categoria" name="categoria">
-            <option value="">Todas las categorías</option>
-            {% for categoria in categorias %}
-                <option value="{{ categoria.pk }}" {% if categoria_seleccionada == categoria.pk|stringformat:"s" %}selected{% endif %}>
-                    {{ categoria.nombre }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit">Buscar</button>
-    </form>
+    <section class="catalog-hero">
+        <div>
+            <span class="eyebrow">TU PAUSA FAVORITA</span>
+            <h1>Un antojo, a un clic.</h1>
+            <p>Encuentra algo rico y déjalo listo para retirar.</p>
+        </div>
+        <span class="hero-cup" aria-hidden="true">☕</span>
+    </section>
 
-    {% if productos %}
-        <ul>
-            {% for producto in productos %}
-                <li>
-                    <h2>{{ producto.nombre }}</h2>
-                    <p>{{ producto.categoria.nombre }}</p>
-                    <p>{{ producto.descripcion }}</p>
-                    <p>{{ producto.precio|pesos_chilenos }}</p>
-                    {% if producto.stock > 0 %}
-                        <form method="post" action="{% url 'agregar_al_carrito' producto.pk %}">
-                            {% csrf_token %}
-                            <button type="submit">Agregar al carrito</button>
-                        </form>
-                    {% else %}
-                        <p role="status">Agotado</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No se encontraron productos disponibles.</p>
-    {% endif %}
+    <section class="catalog-section" aria-labelledby="catalog-title">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">RECIÉN HECHO PARA TI</span>
+                <h2 id="catalog-title">Nuestro catálogo</h2>
+            </div>
+            <span class="section-note">Elige tus favoritos</span>
+        </div>
+        <form class="filter-bar" method="get">
+            <label class="search-field" for="q">
+                <span aria-hidden="true">⌕</span>
+                <input id="q" name="q" type="search" value="{{ busqueda }}" placeholder="¿Qué se te antoja?">
+            </label>
+            <label class="select-field" for="categoria">
+                <span class="sr-only">Categoría</span>
+                <select id="categoria" name="categoria">
+                    <option value="">Todas las categorías</option>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria.pk }}" {% if categoria_seleccionada == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ categoria.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% if productos %}
+            <ul class="product-grid">
+                {% for producto in productos %}
+                    <li class="product-card">
+                        <div class="product-visual" aria-hidden="true">
+                            {% if "Cafés" in producto.categoria.nombre %}☕{% elif "Tés" in producto.categoria.nombre %}🍵{% elif "Pastelería" in producto.categoria.nombre %}🥐{% else %}🥪{% endif %}
+                        </div>
+                        <div class="product-info">
+                            <span class="product-category">{{ producto.categoria.nombre }}</span>
+                            <h3>{{ producto.nombre }}</h3>
+                            <p class="product-description">{{ producto.descripcion|default:"Una opción deliciosa para disfrutar." }}</p>
+                            <div class="product-buy-row">
+                                <strong class="product-price">{{ producto.precio|pesos_chilenos }}</strong>
+                                {% if producto.stock > 0 %}
+                                    <form method="post" action="{% url 'agregar_al_carrito' producto.pk %}">
+                                        {% csrf_token %}
+                                        <button class="add-button" type="submit" aria-label="Agregar {{ producto.nombre }} al carrito">+</button>
+                                    </form>
+                                {% else %}
+                                    <span class="sold-out" role="status">Agotado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state">
+                <span aria-hidden="true">☕</span>
+                <h3>No encontramos productos</h3>
+                <p>Prueba con otra búsqueda o categoría.</p>
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}
