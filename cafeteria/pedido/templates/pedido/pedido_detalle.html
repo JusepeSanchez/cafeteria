@@ -1,0 +1,24 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Pedido #{{ pedido.pk }} | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Pedido #{{ pedido.pk }}</h1>
+    <p>Estado: {{ pedido.get_estado_display }}</p>
+    <p>Retiro: {{ pedido.retiro_en|date:"d/m/Y H:i" }}</p>
+    {% if pedido.observacion %}<p>Observación: {{ pedido.observacion }}</p>{% endif %}
+    <ul>
+        {% for detalle in pedido.detalles.all %}
+            <li>{{ detalle.producto.nombre }} × {{ detalle.cantidad }} — {{ detalle.subtotal_unitario|pesos_chilenos }}</li>
+        {% endfor %}
+    </ul>
+    <p>Total: {{ pedido.total|pesos_chilenos }}</p>
+    {% if pedido.estado == "pendiente" %}
+        <form method="post" action="{% url 'cancelar_pedido' pedido.pk %}">
+            {% csrf_token %}
+            <button type="submit">Cancelar pedido</button>
+        </form>
+    {% endif %}
+    <a href="{% url 'mis_pedidos' %}">Volver a mis pedidos</a>
+{% endblock %}

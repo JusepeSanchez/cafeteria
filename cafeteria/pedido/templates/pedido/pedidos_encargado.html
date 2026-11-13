@@ -1,0 +1,39 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Pedidos del día | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Pedidos del día</h1>
+    <form method="get">
+        <label for="estado">Filtrar por estado</label>
+        <select id="estado" name="estado">
+            <option value="">Todos</option>
+            {% for valor, etiqueta in estados %}
+                <option value="{{ valor }}" {% if estado_seleccionado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+    <ul>
+        {% for pedido in pedidos %}
+            <li>
+                Pedido #{{ pedido.pk }} — {{ pedido.cliente.username }} — {{ pedido.get_estado_display }}
+                — {{ pedido.total|pesos_chilenos }} — Retiro {{ pedido.retiro_en|date:"H:i" }}
+                <ul>
+                    {% for detalle in pedido.detalles.all %}
+                        <li>{{ detalle.producto.nombre }} × {{ detalle.cantidad }}</li>
+                    {% endfor %}
+                </ul>
+                {% if pedido.estado != "entregado" and pedido.estado != "cancelado" %}
+                    <form method="post" action="{% url 'avanzar_pedido' pedido.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Avanzar estado</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>No hay pedidos para mostrar.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -6,12 +6,19 @@
     <title>{% block title %}Cafetería{% endblock %}</title>
 </head>
 <body>
+    {% load catalogo_extras %}
     <header>
         <a href="{% url 'inicio' %}">Cafetería</a>
         {% if user.is_authenticated %}
             <span>Conectado: {{ user.get_username }} ({{ user.is_staff|yesno:"Encargado,Cliente" }})</span>
-            {% if not user.is_staff %}
+            {% if user.is_staff %}
+                <a href="{% url 'gestion_productos' %}">Productos</a>
+                <a href="{% url 'gestion_categorias' %}">Categorías</a>
+                <a href="{% url 'pedidos_del_dia' %}">Pedidos</a>
+            {% else %}
                 <a href="{% url 'catalogo' %}">Catálogo</a>
+                <a href="{% url 'carrito' %}">Carrito ({{ request.session.carrito|unidades_carrito }})</a>
+                <a href="{% url 'mis_pedidos' %}">Mis pedidos</a>
             {% endif %}
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}

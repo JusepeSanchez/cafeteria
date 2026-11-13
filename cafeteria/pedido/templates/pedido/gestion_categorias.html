@@ -1,0 +1,18 @@
+{% extends "pedido/base.html" %}
+
+{% block title %}Gestión de categorías | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Categorías</h1>
+    <a href="{% url 'gestion_categoria_crear' %}">Crear categoría</a>
+    <ul>
+        {% for categoria in categorias %}
+            <li>
+                <a href="{% url 'gestion_categoria_detalle' categoria.pk %}">{{ categoria.nombre }}</a>
+                {% if categoria.activa %}Activa{% else %}Inactiva{% endif %}
+            </li>
+        {% empty %}
+            <li>No hay categorías.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

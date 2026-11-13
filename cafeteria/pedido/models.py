@@ -1,6 +1,8 @@
+from decimal import Decimal
+
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import Q
 
 
 class Categoria(models.Model):
@@ -18,6 +20,11 @@ class Categoria(models.Model):
 
 
 class Producto(models.Model):
+    codigo = models.CharField(
+        max_length=7,
+        unique=True,
+        validators=[RegexValidator(r"^CAF-\d{3}$", "Usa el formato CAF-000.")],
+    )
     categoria = models.ForeignKey(
         Categoria,
         on_delete=models.PROTECT,
@@ -25,7 +32,11 @@ class Producto(models.Model):
     )
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(100), MaxValueValidator(20000)],
+    )
     stock = models.PositiveIntegerField(default=0)
     disponible = models.BooleanField(default=True)
 
@@ -33,9 +44,9 @@ class Producto(models.Model):
         ordering = ["nombre"]
         constraints = [
             models.CheckConstraint(
-                condition=Q(precio__gte=0),
-                name="producto_precio_no_negativo",
-            ),
+                condition=models.Q(precio__gte=100, precio__lte=20000),
+                name="producto_precio_rango_valido",
+            )
         ]
 
     def __str__(self):
@@ -43,11 +54,19 @@ class Producto(models.Model):
 
 
 class Pedido(models.Model):
-    class Estado(models.TextChoices):
-        PENDIENTE = "pendiente", "Pendiente"
-        PREPARADO = "preparado", "Preparado"
-        ENTREGADO = "entregado", "Entregado"
-        CANCELADO = "cancelado", "Cancelado"
+    PENDIENTE = "pendiente"
+    EN_PREPARACION = "en_preparacion"
+    LISTO = "listo"
+    ENTREGADO = "entregado"
+    CANCELADO = "cancelado"
+
+    ESTADO_CHOICES = [
+        (PENDIENTE, "Pendiente"),
+        (EN_PREPARACION, "En preparación"),
+        (LISTO, "Listo"),
+        (ENTREGADO, "Entregado"),
+        (CANCELADO, "Cancelado"),
+    ]
 
     cliente = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -55,24 +74,26 @@ class Pedido(models.Model):
         related_name="pedidos",
     )
     creado_en = models.DateTimeField(auto_now_add=True)
+    retiro_en = models.DateTimeField()
+    observacion = models.TextField(blank=True)
     estado = models.CharField(
-        max_length=12,
-        choices=Estado.choices,
-        default=Estado.PENDIENTE,
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default=PENDIENTE,
     )
 
     class Meta:
         ordering = ["-creado_en"]
 
-    def __str__(self):
-        return f"Pedido #{self.pk} - {self.cliente}"
-
     @property
     def total(self):
-        return sum(
-            (detalle.subtotal for detalle in self.detalles.all()),
-            start=0,
-        )
+        total = Decimal("0.00")
+        for detalle in self.detalles.all():
+            total += detalle.precio_unitario * detalle.cantidad
+        return total
+
+    def __str__(self):
+        return f"Pedido {self.pk} - Cliente: {self.cliente.username} - Estado: {self.estado}"
 
 
 class DetallePedido(models.Model):
@@ -97,18 +118,18 @@ class DetallePedido(models.Model):
                 name="detalle_producto_unico_por_pedido",
             ),
             models.CheckConstraint(
-                condition=Q(cantidad__gte=1),
+                condition=models.Q(cantidad__gte=1),
                 name="detalle_cantidad_positiva",
             ),
             models.CheckConstraint(
-                condition=Q(precio_unitario__gte=0),
+                condition=models.Q(precio_unitario__gte=0),
                 name="detalle_precio_no_negativo",
             ),
         ]
 
-    def __str__(self):
-        return f"{self.cantidad} x {self.producto}"
-
     @property
-    def subtotal(self):
+    def subtotal_unitario(self):
         return self.cantidad * self.precio_unitario
+
+    def __str__(self):
+        return f"{self.producto.nombre} x {self.cantidad}"

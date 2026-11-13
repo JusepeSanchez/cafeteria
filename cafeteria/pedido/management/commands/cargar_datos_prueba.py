@@ -45,11 +45,12 @@ class Command(BaseCommand):
             ("Atún", "Sandwiches", 4100, 3, True),
             ("Pollo pesto", "Sandwiches", 4500, 0, False),
         ]
-        for nombre, nombre_categoria, precio, stock, disponible in productos:
+        for indice, (nombre, nombre_categoria, precio, stock, disponible) in enumerate(productos, 1):
             Producto.objects.update_or_create(
                 categoria=categorias_creadas[nombre_categoria],
                 nombre=nombre,
                 defaults={
+                    "codigo": f"CAF-{indice:03d}",
                     "descripcion": f"{nombre} de la cafetería.",
                     "precio": precio,
                     "stock": stock,

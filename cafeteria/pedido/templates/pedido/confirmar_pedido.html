@@ -1,0 +1,14 @@
+{% extends "pedido/base.html" %}
+
+{% block title %}Confirmar pedido | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Confirmar pedido</h1>
+    <p>Unidades en el carrito: {{ total_unidades }}</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Confirmar y pagar al retirar</button>
+    </form>
+    <a href="{% url 'carrito' %}">Volver al carrito</a>
+{% endblock %}

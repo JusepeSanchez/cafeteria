@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.db.models.deletion import ProtectedError
 from django.test import TestCase
+from django.utils import timezone
 
 from .admin import DetallePedidoInline
 from .models import Categoria, DetallePedido, Pedido, Producto
@@ -18,6 +19,7 @@ class ModeloPedidoTests(TestCase):
         )
         self.categoria = Categoria.objects.create(nombre="Cafés")
         self.producto = Producto.objects.create(
+            codigo="CAF-001",
             categoria=self.categoria,
             nombre="Espresso",
             precio=Decimal("1500.00"),
@@ -29,7 +31,7 @@ class ModeloPedidoTests(TestCase):
             self.categoria.delete()
 
     def test_producto_en_pedido_no_se_puede_eliminar(self):
-        pedido = Pedido.objects.create(cliente=self.cliente)
+        pedido = Pedido.objects.create(cliente=self.cliente, retiro_en=timezone.now())
         DetallePedido.objects.create(
             pedido=pedido,
             producto=self.producto,
@@ -41,7 +43,7 @@ class ModeloPedidoTests(TestCase):
             self.producto.delete()
 
     def test_pedido_muestra_detalles_y_total(self):
-        pedido = Pedido.objects.create(cliente=self.cliente)
+        pedido = Pedido.objects.create(cliente=self.cliente, retiro_en=timezone.now())
         DetallePedido.objects.create(
             pedido=pedido,
             producto=self.producto,

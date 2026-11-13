@@ -1,0 +1,18 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Mis pedidos | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Mis pedidos</h1>
+    <ul>
+        {% for pedido in pedidos %}
+            <li>
+                <a href="{% url 'pedido_detalle' pedido.pk %}">Pedido #{{ pedido.pk }}</a>
+                · {{ pedido.get_estado_display }} · {{ pedido.total|pesos_chilenos }}
+            </li>
+        {% empty %}
+            <li>Aún no tienes pedidos.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

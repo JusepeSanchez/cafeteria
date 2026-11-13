@@ -1,0 +1,17 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}{{ producto.nombre }} | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>{{ producto.nombre }}</h1>
+    <p>Código: {{ producto.codigo }}</p>
+    <p>Categoría: {{ producto.categoria.nombre }}</p>
+    <p>{{ producto.descripcion }}</p>
+    <p>Precio: {{ producto.precio|pesos_chilenos }}</p>
+    <p>Stock: {{ producto.stock }}</p>
+    <p>{% if producto.disponible %}Disponible{% else %}No disponible{% endif %}</p>
+    <a href="{% url 'gestion_producto_editar' producto.pk %}">Editar</a>
+    <a href="{% url 'gestion_producto_eliminar' producto.pk %}">Eliminar</a>
+    <a href="{% url 'gestion_productos' %}">Volver a productos</a>
+{% endblock %}

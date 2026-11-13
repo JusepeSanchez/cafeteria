@@ -1,0 +1,41 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Gestión de productos | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Productos</h1>
+    <a href="{% url 'gestion_producto_crear' %}">Crear producto</a>
+    <form method="get">
+        <label for="q">Buscar por nombre o código</label>
+        <input id="q" name="q" type="search" value="{{ busqueda }}">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria">
+            <option value="">Todas</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.pk }}" {% if categoria_seleccionada == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ categoria.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+        <label for="disponible">Disponibilidad</label>
+        <select id="disponible" name="disponible">
+            <option value="">Todas</option>
+            <option value="1" {% if disponibilidad_seleccionada == "1" %}selected{% endif %}>Disponible</option>
+            <option value="0" {% if disponibilidad_seleccionada == "0" %}selected{% endif %}>No disponible</option>
+        </select>
+        <button type="submit">Filtrar</button>
+    </form>
+    <ul>
+        {% for producto in productos %}
+            <li>
+                <a href="{% url 'gestion_producto_detalle' producto.pk %}">{{ producto.codigo }} — {{ producto.nombre }}</a>
+                · {{ producto.categoria.nombre }} · {{ producto.precio|pesos_chilenos }}
+                · Stock: {{ producto.stock }}
+                · {% if producto.disponible %}Disponible{% else %}No disponible{% endif %}
+            </li>
+        {% empty %}
+            <li>No hay productos que coincidan.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "pedido/base.html" %}
+
+{% block title %}{{ categoria.nombre }} | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>{{ categoria.nombre }}</h1>
+    <p>{{ categoria.descripcion }}</p>
+    <p>{% if categoria.activa %}Activa{% else %}Inactiva{% endif %}</p>
+    <a href="{% url 'gestion_categoria_editar' categoria.pk %}">Editar</a>
+    <a href="{% url 'gestion_categoria_eliminar' categoria.pk %}">Eliminar</a>
+    <a href="{% url 'gestion_categorias' %}">Volver a categorías</a>
+{% endblock %}

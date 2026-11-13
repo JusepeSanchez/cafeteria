@@ -1,0 +1,38 @@
+{% extends "pedido/base.html" %}
+{% load catalogo_extras %}
+
+{% block title %}Carrito | Cafetería{% endblock %}
+
+{% block content %}
+    <h1>Carrito</h1>
+    {% if items %}
+        <ul>
+            {% for item in items %}
+                <li>
+                    {{ item.producto.nombre }} — {{ item.subtotal|pesos_chilenos }}
+                    <form method="post" action="{% url 'actualizar_carrito' item.producto.pk %}">
+                        {% csrf_token %}
+                        <label for="cantidad-{{ item.producto.pk }}">Cantidad</label>
+                        <input id="cantidad-{{ item.producto.pk }}" name="cantidad" type="number" min="1"
+                               max="{{ item.producto.stock }}" value="{{ item.cantidad }}" required>
+                        <button type="submit">Actualizar</button>
+                    </form>
+                    <form method="post" action="{% url 'quitar_del_carrito' item.producto.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Quitar</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        <p>Unidades: {{ total_unidades }} / 10</p>
+        <p>Total: {{ total|pesos_chilenos }}</p>
+        <a href="{% url 'confirmar_pedido' %}">Confirmar pedido</a>
+        <form method="post" action="{% url 'vaciar_carrito' %}">
+            {% csrf_token %}
+            <button type="submit">Vaciar carrito</button>
+        </form>
+    {% else %}
+        <p>Tu carrito está vacío.</p>
+    {% endif %}
+    <a href="{% url 'catalogo' %}">Seguir comprando</a>
+{% endblock %}

@@ -20,18 +20,21 @@ class CatalogoTests(TestCase):
             activa=False,
         )
         self.producto = Producto.objects.create(
+            codigo="CAF-001",
             categoria=self.categoria,
             nombre="Espresso",
             precio=Decimal("1500.00"),
             stock=2,
         )
         Producto.objects.create(
+            codigo="CAF-002",
             categoria=self.categoria,
             nombre="Moka agotado",
             precio=Decimal("2800.00"),
             stock=0,
         )
         Producto.objects.create(
+            codigo="CAF-003",
             categoria=self.categoria,
             nombre="Producto no disponible",
             precio=Decimal("2000.00"),
@@ -39,6 +42,7 @@ class CatalogoTests(TestCase):
             disponible=False,
         )
         Producto.objects.create(
+            codigo="CAF-004",
             categoria=self.categoria_inactiva,
             nombre="Producto de temporada",
             precio=Decimal("2500.00"),
